@@ -1,0 +1,34 @@
+---
+title: "Lec7_'RLesur/Rcade'"
+author: "Daniel Chen"
+date: "January 29, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+install.packages("devtools")
+```
+```{r}
+devtools::install_github('RLesur/Rcade')
+```
+
+
+```{r}
+Rcade::games
+```
+
+```{r}
+Rcade::games$`2048`
+```
+```{r}
+Rcade::games$Pacman
+```
+
+```{r}
+Rcade::games$Mariohtml5
+```
+

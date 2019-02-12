@@ -1,0 +1,25 @@
+---
+title: "msa_pckg"
+author: "Daniel Chen"
+date: "January 29, 2019"
+output: html_document
+---
+```{r}
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("msa", version = "3.8")
+```
+```{r}
+library(msa)
+```
+
+
+
+```{r}
+browseVignettes("msa")
+```
+
+```{r}
+
+```
+
