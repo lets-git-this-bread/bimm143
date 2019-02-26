@@ -1,0 +1,213 @@
+---
+title: "Class 15: Transcriptomics and the analysis of RNA-Seq data"
+author: "Daniel Chen"
+date: "February 26, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+metadata <- read.csv("Data/airway_metadata.csv", stringsAsFactors = FALSE)
+
+counts <- read.csv("Data/airway_scaledcounts.csv", stringsAsFactors = FALSE)
+
+```
+
+```{r}
+dim(counts)
+#head(counts)
+head(metadata)
+
+
+```
+
+```{r}
+head(counts)
+```
+```{r}
+colnames(counts)
+```
+
+```{r}
+metadata$id
+
+```
+Check for correspondence of metadata and countdata
+
+```{r}
+all(colnames(counts)[-1] == metadata$id)
+```
+Find which id's are the controls
+
+```{r}
+control.inds <- metadata$dex == "control"
+
+control.ids <- metadata$id[control.inds]
+
+head(counts[, control.ids])
+
+
+```
+
+Calculate the mean counts value for all genes
+
+```{r}
+rowSums(counts[, control.ids])/ ncol(counts[, control.ids])
+
+control.mean <- rowSums(counts[, control.ids])/ ncol(counts[, control.ids]) #CONTROL MEAN
+ 
+names(control.mean) <- counts$ensgene
+
+head(control.mean)
+```
+
+
+Now do the same thing for the drug treated samples i.e. *treated* columns
+
+
+```{r}
+
+
+treated.inds <- metadata$dex=="treated"
+
+treated.ids <- metadata$id[treated.inds]
+
+head(counts[,treated.ids])
+
+treated.mean <- rowSums(counts[,treated.ids])/ ncol(counts[, treated.ids])  #TREATED MEAN
+
+names(treated.mean) <- counts$ensgene
+
+head(treated.mean)
+
+```
+
+Combine the mean count values for control and treated into a new data.frame called mean counts!
+
+```{r}
+meancounts <- data.frame (control.mean, treated.mean)
+```
+```{r}
+colSums(meancounts)
+
+```
+
+
+```{r}
+plot(meancounts)
+```
+```{r}
+#logplot
+plot(meancounts, log= "xy")
+```
+```{r}
+meancounts$log2fc <- log2(meancounts[,"treated.mean"]/meancounts[,"control.mean"])
+head(meancounts)
+```
+
+
+```{r}
+# "which" gives you the position on the list for your logic, val=0, and arr.ind=TRUE gives you the row and col position
+zero.vals <- which(meancounts[,1:2]==0, arr.ind=TRUE)
+#Just gives rows of zero values
+to.rm <- unique(zero.vals[,1]) 
+
+mycounts <- meancounts[-to.rm,]
+
+head(mycounts)
+
+```
+
+```{r}
+up.ind <- mycounts$log2fc> 2
+down.ind <- mycounts$log2fc< (-2)
+```
+
+```{r}
+sum(up.ind)
+```
+
+```{r}
+sum(down.ind)
+```
+```{r}
+head(mycounts[up.ind,])
+```
+
+#Adding annotation data
+
+Merging two data frames
+
+#merge(x,y), where x is the data, and y is ENSEMBLE annotation (names, labels, titles, etc.)
+
+```{r}
+annot <- read.csv("Data/annotables_grch38.csv")
+head(annot)
+```
+```{r}
+mycounts.annotated <- merge(x=mycounts, y=annot, by.x = "row.names", by.y = "ensgene")
+
+head(mycounts.annotated)
+```
+
+###DESeq2 analysis
+
+```{r}
+library(DESeq2)
+citation("DESeq2")
+
+```
+#DESeq2 requires 3 items: count matrix, metadat file and a formula indicating the design of the experiment
+
+```{r}
+dds <- DESeqDataSetFromMatrix(countData=counts, 
+                              colData=metadata, 
+                              design=~dex, # the tilde points to the id we want to look at
+                              tidy=TRUE)
+dds
+```
+
+```{r}
+dds <- DESeq(dds) 
+```
+
+```{r}
+res <- results(dds)
+
+head(res)
+
+summary(res)
+
+```
+
+```{r}
+res01 <- results(dds, alpha=0.01)
+summary(res01)
+```
+```{r}
+mycols <- rep("gray", nrow(res01))
+mycols[abs(res01$log2FoldChange)>2] <- "blue"
+#colors a form of significance: p<0.01 and fold change <-2 or >2
+sig <- (res01$padj<0.01) & (abs(res01$log2FoldChange)>2)
+mycols[sig] <- "orange"
+
+plot(res01$log2FoldChange, -log(res01$padj), col=mycols, xlab="Log2(FoldChange)", ylab="-Log(P-value)")
+#draws lines/ quadrants of siginificant points
+abline(v=c(-2,2), col="red", lty=2)
+abline(h=-log(0.1), col="red", lty=2)
+
+```
+
+
+
+
+
+
+
+
+
+
+
