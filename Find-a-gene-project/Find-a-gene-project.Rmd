@@ -1,0 +1,35 @@
+---
+title: "Find a Gene Project"
+author: "Daniel Chen"
+date: "March 11, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r}
+library(bio3d)
+```
+
+```{r}
+msagene <- read.fasta("~/Bio papers/BIMM 143/clustalo-2.fst")
+
+genealign <- seqidentity(msagene)
+
+genealign
+msagene
+
+hmcols <- densCols(genealign[genealign], colramp = colorRampPalette(c("blue2","green2","red2", "yellow2")))
+
+heatmap(genealign, margins = c(14,7), cexRow = 1, cexCol = 1, main= "Sequence Identity", col= heat.colors(15, alpha = 0.8))
+
+```
+
+```{r}
+frogseq <- read.fasta("~/Bio papers/BIMM 143/clustalo-just-the-frog.fst")
+blast.pdb(frogseq)
+```
+
+

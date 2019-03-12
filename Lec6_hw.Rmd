@@ -1,0 +1,38 @@
+---
+title: "lec6_hw"
+author: "Daniel Chen"
+date: "January 31, 2019"
+output: html_document
+---
+
+```{r}
+s1 <- read.pdb("4AKE") # kinase with drug
+s2 <- read.pdb("1AKE") # kinase no drug
+s3 <- read.pdb("1E4Y") # kinase with drug
+
+kinase.test <- function(x) {
+ 
+sn <- read.pdb(x)
+sn.chainA <- trim.pdb(sn, chain= "A", elety="CA")
+sn.b <- sn.chainA$atom$b
+plotb3(sn.b, sse=sn.chainA, typ="l", ylab= "Bfactor")
+
+}
+
+```
+
+```{r}
+kinase.test("4AKE")
+```
+```
+```{r}
+ hc <- hclust( dist( rbind(s1.b, s2.b, s3.b) ) )
+plot(hc)
+```
+```
+```{r}
+dendoplot<- function(x,y,z) {
+  plot(hclust(dist(rbind(x,y,z))))
+
+}
+```
