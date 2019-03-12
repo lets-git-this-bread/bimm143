@@ -4,4 +4,11 @@ This is a store of my class-work for [BIMM143 Winter 2019](https://bioboot.githu
 
 ## Contents
 - Class05 R Graphics
-
+- Class06
+- Class07
+- Class09
+- Class11
+- Class13
+- Class14
+- Class15
+- Class18
