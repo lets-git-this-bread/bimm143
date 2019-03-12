@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 receptor = 1hsg_protein.pdbqt
 ligand = 1hsg_ligand.pdbqt
 
@@ -13,3 +14,20 @@ size_y = 30
 size_z = 30
 
 seed = 2009
+=======
+receptor = 1hsg_protein.pdbqt
+ligand = 1hsg_ligand.pdbqt
+
+num_modes = 50
+out = all.pdbqt
+
+center_x = 16
+center_y = 25
+center_z = 4
+
+size_x = 30
+size_y = 30
+size_z = 30
+
+seed = 2009
+>>>>>>> 89ef1019e68c7d6fa279e87dcff261b4c376e2c4

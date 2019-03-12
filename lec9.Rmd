@@ -1,0 +1,166 @@
+---
+title: "Class09"
+author: "Daniel Chen"
+date: "February 7, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# Save your input data file to a new 'data' directory
+fna.data <- "WisconsinCancer (2).csv"
+
+# Complete the following code to input the data and store as wisc.df
+wisc.df <- read.csv(fna.data)
+wisc.data <- as.matrix(wisc.df[ ,3:32])
+
+```
+```{r}
+#set row names
+row.names(wisc.data) <- wisc.df$id
+```
+```{r}
+diagnosis <- as.numeric( wisc.df$diagnosis =="M")
+```
+
+
+
+```{r}
+#lets double check
+cbind(diagnosis, wisc.df$diagnosis == "M")
+```
+
+```{r}
+#Q1 how many observations #Q2 want to know how many variables/features in the data are suffixed with  "_mean"?
+nrow(wisc.data)
+inds <- grep("_mean", colnames(wisc.data))
+length(inds)
+
+```
+
+```{r}
+#Q3. How many of the observations have a malignant diagnosis?
+sum(diagnosis)
+```
+```{r}
+# Check column means and standard deviations
+colMeans(wisc.data)
+
+apply(wisc.data,2,sd)
+```
+
+```{r}
+#perform PCA on wisc.data by completing the following code
+wisc.pr <- prcomp(wisc.data, scale=TRUE)
+summary(wisc.pr)
+```
+```{r}
+biplot(wisc.pr)
+```
+```{r}
+plot(wisc.pr$x[,1], wisc.pr$x[,2], col= diagnosis+1, xlab= "PC1", ylab= "PC2")
+```
+```{r}
+plot(wisc.pr$x[,1], wisc.pr$x[,3], col= diagnosis+1, xlab= "PC1", ylab= "PC3")
+
+```
+##Variance captured in each PC
+
+This info is in the $sdev component of our PCA result
+```{r}
+variance<- wisc.pr$sdev^2
+pve <- round((variance/sum(variance)) * 100, 1)
+```
+
+```{r}
+plot(pve, xlab = "Principal Component", 
+     ylab = "Proportion of Variance Explained", 
+     ylim = c(0, 1), type = "o")
+```
+```{r}
+barplot(pve, ylab = "Precent of Variance Explained",
+     names.arg=paste0("PC",1:length(pve)), las=2, axes = FALSE)
+axis(2, at=pve, labels=round(pve,2) )
+```
+
+```{r}
+data.scaled <- scale(wisc.data)
+round( apply(wisc.data, 2, sd), 1)
+```
+```{r}
+#calculate euclidean distances 
+data.dist <- dist(data.scaled)
+```
+Hierarchical Cluster
+```{r}
+#hclust(dist(x), method=?)
+wisc.hclus <- hclust(data.dist, method = "complete")
+plot(wisc.hclus)
+```
+
+###Cluster in PCA space
+
+For clustering we need:
+1. Distance matrix
+2. Clustering function
+3. Cutree
+
+Our PCA result of PC1 vs. PC2
+```{r}
+plot(wisc.pr$x[,1], wisc.pr$x[,2], col= diagnosis+1)
+
+```
+```{r}
+pc.dist <- dist(wisc.pr$x[,1:2])
+pc.hclust <- hclust(pc.dist, method="ward.D2")
+plot(pc.hclust)
+
+```
+
+```{r}
+#cutree
+ grps3 <- cutree(pc.hclust, k=3)
+table(grps3)
+```
+
+```{r}
+type=table(grps3, diagnosis)
+# 0=benign, 1=malignant
+
+type
+```
+
+
+```{r}
+#making a function to read out "benign" and "malignant" 
+for (x in 1:nrow(type)){
+  z=type[x,1]
+  o=type[x,2]
+  print(paste(x,z,o), header= "malignant")
+}
+```
+
+
+```{r}
+table(grps3, wisc.pr$diagnosis)
+
+```
+
+# 7. Prediction
+
+We will use the `predict()` function that will take our PCA model from before and [new cancer cell data](https://tinyurl.com/new-samples-CSV) and project that data onto our PCA space.
+
+```{r}
+#url <- "new_samples.csv"
+url <- "https://tinyurl.com/new-samples-CSV"
+new <- read.csv(url)
+npc <- predict(wisc.pr, newdata=new)
+npc
+
+plot(wisc.pr$x[,1:2], col=grps3)
+points(npc[,1], npc[,2], col="blue", cex=3, pch=12)
+
+```

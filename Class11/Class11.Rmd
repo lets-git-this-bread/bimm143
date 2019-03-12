@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ---
 title: "Class11: Structural Bioinformatics 1"
 output: github_document
@@ -69,3 +70,76 @@ write.pdb(lig.pdb, file="ligand.pdb")
 ```
 Need bio3d.view to see the 3d visualization in R
 
+=======
+---
+title: "Class11: Structural Bioinformatics 1"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+###Section1. The PDB
+
+Q1. Determine the percentage of structures solved by X-Ray and Electron Microscopy. From
+the website what proportion of structures are protein?
+```{r}
+stats <- read.csv("Data Export Summary.csv", row.names = 1)
+stats
+```
+
+```{r}
+stats$Total/sum(stats$Total)
+
+percent.by.method <- stats$Total/sum(stats$Total)
+
+names(percent.by.method) <- rownames(stats)
+
+percent.by.method
+```
+
+```{r}
+sum(stats$Proteins)/sum(stats$Total)
+```
+
+```{r}
+library(bio3d)
+
+hsg <- read.pdb("1HSG")
+hsg
+
+```
+
+```{r}
+pdb$atom
+
+```
+
+```{r}
+pdb <- read.pdb("1HSG")
+
+PROT.INDS<- atom.select(pdb, "protein")
+PROT.INDS
+
+LIG.INDS <- atom.select(pdb, "ligand")
+LIG.INDS
+
+
+
+```
+```{r}
+prot.pdb <- trim.pdb(pdb, PROT.INDS)
+write.pdb(prot.pdb, file="protein.pdb")
+
+```
+
+Lets do the same thing for our drug
+
+```{r}
+lig.pdb <- trim.pdb(pdb, LIG.INDS)
+write.pdb(lig.pdb, file="ligand.pdb")
+```
+Need bio3d.view to see the 3d visualization in R
+
+>>>>>>> 89ef1019e68c7d6fa279e87dcff261b4c376e2c4

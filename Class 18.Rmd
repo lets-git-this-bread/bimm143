@@ -1,0 +1,112 @@
+---
+title: "Class18"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+library(GenomicDataCommons)
+library(TCGAbiolinks)
+library(maftools)
+```
+
+```{r}
+GenomicDataCommons::status()
+```
+```{r}
+cases_by_project <- cases() %>%
+  facet("project.project_id") %>%
+  aggregations()
+head(cases_by_project)
+```
+```{r}
+x <- cases_by_project$project.project_id
+
+barplot(x$doc_count, names.arg = x$key, las=2, log="y")
+
+colvec <- rep("lightblue", nrow(x))
+colvec[x] <- "red"
+
+```
+
+```{r}
+maf.file <- GDCquery_Maf(tumor="PAAD", pipelines = "mutect")
+vars = read.maf(maf = maf.file, verbose = FALSE)
+plotmafSummary(vars)
+lollipopPlot(vars, gene='KRAS')
+
+```
+##Part 2: Personalized cancer vaccine
+
+```{r}
+library(bio3d)
+
+seqs <- read.fasta("~/Bio papers/BIMM 143/bimm143_github/lecture18_sequences.fa" )
+#stars denote mismatches
+
+seqs
+
+```
+```{r}
+## Calculate positional identity scores
+ide <- conserv(seqs$ali, method="identity")
+mutant.sites <- which(ide < 1) 
+```
+```{r}
+gaps <- gap.inspect(seqs)
+mutant.sites <- mutant.sites[mutant.sites %in% gaps$f.inds]
+
+mutant.sites
+```
+```{r}
+mutant.names <- paste0(seqs$ali["P53_wt",mutant.sites],
+                       mutant.sites,
+                       seqs$ali["P53_mutant",mutant.sites])
+
+mutant.names
+```
+
+```{r}
+start.position <- mutant.sites - 8
+end.position <-  mutant.sites + 8
+
+store.seqs <- matrix("-", nrow=length(mutant.sites), ncol=17)
+rownames(store.seqs) <- mutant.names
+```
+
+
+```{r}
+for(i in 1:length(mutant.sites)) {
+  store.seqs[i,] <- seqs$ali["P53_mutant",start.position[i]:end.position[i]]
+}
+
+store.seqs
+```
+
+
+## Output a FASTA file for further analysis
+
+```{r}
+write.fasta(seqs=store.seqs, ids=mutant.names, file="subsequences.fa")
+```
+
+##MHC-I Binding predictions for antigen presentation to T cells similar to unique tumor peptides(9-mers)
+HLA-A*02:01 : YLDDRNTFV
+HLA-A*68-01 : FVHSVVVPY
+HLA-B*07:02 : SPLPSQAML
+HLA-B*35:01 : FVHSVVVPY
+
+##RANK TOP PEPTIDE FOR EACH HLA ALLELE
+```{r}
+setwd("C:/Users/Daniel/Documents/Bio Papers")
+
+read.csv("C:/Users/Daniel/Documents/Bio Papers/BIMM 143/bimm143_github/result.csv")
+```
+
+
+
+
+
